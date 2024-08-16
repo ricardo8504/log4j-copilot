@@ -772,8 +772,7 @@ public class StatusLogger extends AbstractLogger {
     }
 
     private void notifyListener(final StatusListener listener, final StatusData statusData) {
-        final boolean levelEnabled = isLevelEnabled(listener.getStatusLevel(), statusData.getLevel());
-        if (levelEnabled) {
+        if (config.debugEnabled || listener.getStatusLevel().isLessSpecificThan(statusData.getLevel())) {
             listener.log(statusData);
         }
     }
@@ -968,20 +967,8 @@ public class StatusLogger extends AbstractLogger {
     }
 
     @Override
-    public boolean isEnabled(final Level messageLevel, final Marker marker) {
-        requireNonNull(messageLevel, "messageLevel");
-        final Level loggerLevel = getLevel();
-        return isLevelEnabled(loggerLevel, messageLevel);
-    }
-
-    /**
-     * Checks if the message level is allowed for the filtering level (e.g., of logger, of listener) by taking debug mode into account.
-     *
-     * @param filteringLevel the level (e.g., of logger, of listener) to filter messages
-     * @param messageLevel the level of the message
-     * @return {@code true}, if the sink level is less specific than the message level; {@code false}, otherwise
-     */
-    private boolean isLevelEnabled(final Level filteringLevel, final Level messageLevel) {
-        return config.debugEnabled || filteringLevel.isLessSpecificThan(messageLevel);
+    public boolean isEnabled(final Level level, final Marker marker) {
+        requireNonNull(level, "level");
+        return getLevel().isLessSpecificThan(level);
     }
 }
